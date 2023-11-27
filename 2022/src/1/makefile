@@ -4,7 +4,8 @@ OUT	= a.out
 FILE	= main
 
 execute: compile
-	./a.out < input > output
+	./a.out < input-example > output
+	bat input-example
 	difft output correct
 
 compile: clean $(FILE).o malloc.o
