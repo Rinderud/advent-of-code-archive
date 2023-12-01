@@ -1,7 +1,61 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define N 1000
+#define N 100
+
+int bfr[N];
+int a, b, sum, bi;
+
+void reset_buffer()
+{
+    a = -1;
+    b = -1;
+    bi = 0;
+    for (size_t i = 0; i < N; i++)
+    {
+        bfr[i] = 1;
+    }
+}
+
+void push(int in)
+{
+    bfr[bi] = in;
+    bi++;
+}
+
+void set_ab(int num)
+{
+    if (a == -1) // First time a digit comes
+    {
+        a = num;
+    }
+    else
+    {
+        b = num;
+    }
+}
+
+void wrap_buffer()
+{
+    // Save the last few letters
+    bfr[0] = bfr[bi - 4];
+    bfr[1] = bfr[bi - 3];
+    bfr[2] = bfr[bi - 2];
+    bfr[3] = bfr[bi - 1];
+    bfr[4] = bfr[bi];
+
+    bi = 0;
+}
+
+void add_to_sum()
+{
+    if (b == -1) // If b was never initialized
+    {
+        b = a; // Assume b = a
+    }
+
+    sum += a * 10 + b;
+}
 
 int is_this(int stack[N], char truth[N])
 {
@@ -56,76 +110,46 @@ int word_to_number(int stack[N])
     return 0;
 }
 
-int check_with_offset(int stack[N], int offset)
+int check_with_offset(int offset)
 {
-    int new_stack[N];
+    int stack[N];
     for (size_t i = 0; i < N - offset; i++)
     {
-        new_stack[i] = stack[i + offset];
+        stack[i] = bfr[i + offset];
     }
-    return word_to_number(new_stack);
+    return word_to_number(stack);
 }
 
-/*
-void print_stack(int stack[N], int j)
+void check_set_buffer()
 {
-    for (size_t i = 0; i < j; i++)
+    for (size_t i = 0; i < N - 2; i++)
     {
-        if (stack[i] == stack[N - 2])
+        int num = check_with_offset(i);
+        if (num != 0) // If it was a digit
         {
-            printf("\n");
-            return;
+            set_ab(num);
+            bfr[bi - 2] = 1; // Remove part of found digit word
         }
-
-        printf("%c ", stack[i]);
     }
-    printf("\n");
 }
-*/
 
 int main(void)
 {
-    int a, b, c, sum, i; //TODO: move to globals
+    int c;
 
-    int empty[N];
-    int prevs[N];
-
-    a = -1;
-    b = -1;
+    reset_buffer();
     sum = 0;
-    i = 0;
 
     while ((c = getchar()) != EOF)
     {
         if (isdigit(c))
         {
-            if (a == -1) // First time a digit comes
-            {
-                a = c - '0';
-            }
-            else
-            {
-                b = c - '0';
-            }
+            set_ab(c - '0');
         }
         else if (c == '\n') // Line is over, time to combine
         {
-            if (b == -1) // If b was never initialized
-            {
-                b = a; // Assume b = a
-            }
-
-            sum += a * 10 + b;
-
-            //  reset
-            //TODO move into function
-            a = -1;
-            b = -1;
-            i = 0;
-            for (size_t j = 0; j < N; j++)
-            {
-                prevs[j] = empty[j];
-            }
+            add_to_sum();
+            reset_buffer();
         }
         else
         {
@@ -151,65 +175,16 @@ int main(void)
                 continue;
             }
 
-            if (i == N - 1) // End of the stack, should not happen but just in case
+            if (bi == N - 1) // End of the stack, should not happen but just in case
             {
-                // Save the last few letters
-                prevs[0] = prevs[i-4];
-                prevs[1] = prevs[i-3];
-                prevs[2] = prevs[i-2];
-                prevs[3] = prevs[i-1];
-                prevs[4] = prevs[i];
-
-                i = 0;
+                wrap_buffer();
             }
-
-            prevs[i] = c; // Push
-            i++;
-
-            for (size_t k = 0; k < N - 2; k++)
-            {
-                int num = check_with_offset(prevs, k);
-                
-                if (num != 0) // If it was a digit 
-                {
-                    prevs[i - 2] = empty[i - 2]; // Get rid of a letter from the found word
-                    
-                    if (a == -1) //TODO: DRY
-                    {
-                        a = num;
-                    }
-                    else
-                    {
-                        b = num;
-                    }
-                }
-            }
+            push(c);
+            check_set_buffer();
         }
     }
-
-    //TODO: DRY
-    for (size_t k = 0; k < N - 2; k++)
-    {
-        int num = check_with_offset(prevs, k);
-        if (num != 0)
-        {
-            if (a == -1)
-            {
-                a = num;
-            }
-            else
-            {
-                b = num;
-            }
-        }
-    }
-
-    if (b == -1)
-    {
-        b = a;
-    }
-
-    sum += a * 10 + b;
+    check_set_buffer();
+    add_to_sum();
 
     printf("%d", sum);
 
