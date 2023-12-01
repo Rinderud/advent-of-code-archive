@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define N 100
+#define N 1000
 
 int is_this(int stack[N], char truth[N])
 {
@@ -161,7 +161,7 @@ int main(void)
             prevs[i] = c;
             i++;
 
-            if (a == 5)
+            if (a == 8)
             {
                 //print_stack(prevs, i);
             }
@@ -172,10 +172,11 @@ int main(void)
                 if (num != 0)
                 {
                     // printf("::num:%d\n", num);
-                    i = 0;
+                    prevs[i-2] = empty[i-2];
+                    //i = 0;
                     for (size_t j = 0; j < N; j++)
                     {
-                        prevs[j] = empty[j];
+                        //prevs[j] = empty[j];
                     }
 
                     if (a == -1)
@@ -197,10 +198,10 @@ int main(void)
         if (num != 0)
         {
             // printf("::num:%d\n", num);
-            i = 0;
+            //i = 0;
             for (size_t j = 0; j < N; j++)
             {
-                prevs[j] = empty[j];
+                //prevs[j] = empty[j];
             }
 
             if (a == -1)
