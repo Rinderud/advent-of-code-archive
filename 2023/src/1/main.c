@@ -66,6 +66,7 @@ int check_with_offset(int stack[N], int offset)
     return word_to_number(new_stack);
 }
 
+/*
 void print_stack(int stack[N], int j)
 {
     for (size_t i = 0; i < j; i++)
@@ -80,25 +81,25 @@ void print_stack(int stack[N], int j)
     }
     printf("\n");
 }
+*/
 
 int main(void)
 {
-    int c, a, b, sum;
+    int a, b, c, sum, i; //TODO: move to globals
 
     int empty[N];
     int prevs[N];
-    int i;
 
     a = -1;
     b = -1;
     sum = 0;
-
     i = 0;
+
     while ((c = getchar()) != EOF)
     {
         if (isdigit(c))
         {
-            if (a == -1)
+            if (a == -1) // First time a digit comes
             {
                 a = c - '0';
             }
@@ -107,19 +108,17 @@ int main(void)
                 b = c - '0';
             }
         }
-        else if (c == '\n')
+        else if (c == '\n') // Line is over, time to combine
         {
-            if (b == -1)
+            if (b == -1) // If b was never initialized
             {
-                b = a;
+                b = a; // Assume b = a
             }
 
             sum += a * 10 + b;
 
-            printf("sum:%d, a=%d, b=%d\n", sum, a, b);
-
-            // print_stack(prevs, i);
             //  reset
+            //TODO move into function
             a = -1;
             b = -1;
             i = 0;
@@ -130,21 +129,21 @@ int main(void)
         }
         else
         {
-            switch (c)
+            switch (c) // If the character is not of interest, don't save it
             {
             case 'o':
+            case 'n':
+            case 'e':
             case 't':
             case 'w':
             case 'h':
             case 'r':
-            case 'e':
-            case 'u':
             case 'f':
+            case 'u':
             case 'i':
             case 'v':
             case 's':
             case 'x':
-            case 'n':
             case 'g':
                 break;
 
@@ -152,34 +151,30 @@ int main(void)
                 continue;
             }
 
-            if (i == N-1)
+            if (i == N - 1) // End of the stack, should not happen but just in case
             {
-                prevs[0] = prevs[i];
+                // Save the last few letters
+                prevs[0] = prevs[i-4];
+                prevs[1] = prevs[i-3];
+                prevs[2] = prevs[i-2];
+                prevs[3] = prevs[i-1];
+                prevs[4] = prevs[i];
+
                 i = 0;
             }
-            // printf("%c", c);
-            prevs[i] = c;
-            i++;
 
-            if (a == 8)
-            {
-                //print_stack(prevs, i);
-            }
+            prevs[i] = c; // Push
+            i++;
 
             for (size_t k = 0; k < N - 2; k++)
             {
                 int num = check_with_offset(prevs, k);
-                if (num != 0)
+                
+                if (num != 0) // If it was a digit 
                 {
-                    // printf("::num:%d\n", num);
-                    prevs[i-2] = empty[i-2];
-                    //i = 0;
-                    for (size_t j = 0; j < N; j++)
-                    {
-                        //prevs[j] = empty[j];
-                    }
-
-                    if (a == -1)
+                    prevs[i - 2] = empty[i - 2]; // Get rid of a letter from the found word
+                    
+                    if (a == -1) //TODO: DRY
                     {
                         a = num;
                     }
@@ -192,18 +187,12 @@ int main(void)
         }
     }
 
+    //TODO: DRY
     for (size_t k = 0; k < N - 2; k++)
     {
         int num = check_with_offset(prevs, k);
         if (num != 0)
         {
-            // printf("::num:%d\n", num);
-            //i = 0;
-            for (size_t j = 0; j < N; j++)
-            {
-                //prevs[j] = empty[j];
-            }
-
             if (a == -1)
             {
                 a = num;
@@ -222,7 +211,6 @@ int main(void)
 
     sum += a * 10 + b;
 
-    printf("sum:%d, a=%d, b=%d\n", sum, a, b);
     printf("%d", sum);
 
     return 0;
