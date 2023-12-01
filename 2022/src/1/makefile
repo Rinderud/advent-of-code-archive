@@ -5,7 +5,6 @@ FILE	= main
 
 execute: compile
 	./a.out < input-example > output
-	bat input-example
 	difft output correct
 
 compile: clean $(FILE).o malloc.o
