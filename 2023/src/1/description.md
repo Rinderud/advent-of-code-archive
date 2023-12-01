@@ -1,15 +1,6 @@
-# Day X: Title
+# Day 1: Trebuchet?
 
-Background on the problem.
+Input:
 
-Example:
-
-```txt
-datapoints
-```
-
-Solution to example:
-
-Fancier data.
-
-Problem statement (goal).
+- each line originally contained calibration value
+- on each line, the calibration is found by combining the first digit and the last digit to form a single two-digit number.
