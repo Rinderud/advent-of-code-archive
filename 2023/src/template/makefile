@@ -3,9 +3,13 @@ CFLAGS	= -std=c11 -pedantic -Wall -Werror -g -O3 -funsigned-char -fsanitize=addr
 OUT	= a.out
 FILE	= main
 
-execute: compile
+example: compile
 	./a.out < inputE > output
 	difft output correct
+
+execute: compile
+	./a.out < input > output
+	bat output
 
 compile: clean $(FILE).o malloc.o
 	$(CC) $(CFLAGS) -o $(OUT) $(FILE).o malloc.o
