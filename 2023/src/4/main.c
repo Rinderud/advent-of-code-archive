@@ -2,6 +2,7 @@
 #include <ctype.h>
 
 #define SIZE 10
+#define BIG_SIZE 200
 #define INI 0
 #define COR 1
 #define INP 2
@@ -147,8 +148,115 @@ void part1(void)
     printf("Sum = %d", sum);
 }
 
+int nbr_correct[BIG_SIZE];
+
+void calc_sum()
+{
+    int nbr_cards[BIG_SIZE];
+    int i, j;
+    for (i = 1; i <= id; i++)
+    {
+        nbr_cards[i] = 1;
+    }
+
+    for (i = 1; i <= id; i++)
+    {
+        for (j = 0; j < nbr_correct[i]; j++)
+        {
+            nbr_cards[i + j + 1] += nbr_cards[i];
+        }
+        printf("Card %d: %d\n", i-1, nbr_cards[i]);
+    }
+
+    sum = -1;
+    for (i = 1; i <= id; i++)
+    {
+        sum += nbr_cards[i];
+    }
+}
+
+void part2(void)
+{
+    int state = INI;
+    reset();
+    sum = 0;
+    id = 1;
+
+    while ((in = getchar()) != EOF)
+    {
+        switch (state)
+        {
+        case INI:
+            if (in == ':')
+            {
+                id++;
+                state = COR;
+            }
+            break;
+        case COR:
+            if (isdigit(in))
+            {
+                num *= 10;
+                num += in - '0';
+            }
+            else if (in == ' ')
+            {
+                if (num != 0)
+                {
+                    push(num);
+                    num = 0;
+                }
+            }
+            else if (in == '|')
+            {
+                state = INP;
+            }
+
+            break;
+        case INP:
+            if (isdigit(in))
+            {
+                num *= 10;
+                num += in - '0';
+            }
+            else if (in == ' ')
+            {
+                if (match(num))
+                {
+                    nbr_match++;
+                }
+
+                num = 0;
+            }
+            else if (in == '\n')
+            {
+                if (match(num))
+                {
+                    nbr_match++;
+                }
+                nbr_correct[id] = nbr_match;
+                reset();
+                state = INI;
+            }
+
+            break;
+
+        default:
+            break;
+        }
+    }
+    if (match(num))
+    {
+        nbr_match++;
+    }
+    nbr_correct[id] = nbr_match;
+
+    calc_sum();
+    printf("Sum = %d", sum);
+}
+
 int main(void)
 {
-    part1();
+    part2();
     return 0;
 }
