@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #define SIZE 20
 #define BIGSIZE 42
@@ -90,9 +91,9 @@ long src_dest_converter(range_list_t ranges, long src)
     return src;
 }
 
-long recursive_src_dest(long se)
+long long recursive_src_dest(long long se)
 {
-    long so, fe, wa, li, te, hu, lo;
+    long long so, fe, wa, li, te, hu, lo;
     so = src_dest_converter(seed_soil, se);
     fe = src_dest_converter(soil_fert, so);
     wa = src_dest_converter(fert_water, fe);
@@ -101,7 +102,7 @@ long recursive_src_dest(long se)
     hu = src_dest_converter(temp_humid, te);
     lo = src_dest_converter(humid_location, hu);
 
-    printf("Seed %ld soil %ld fertilizer %ld water %ld light %ld temperature %ld humidity %ld location %ld\n", se, so, fe, wa, li, te, hu, lo);
+    // printf("Seed %ld soil %ld fertilizer %ld water %ld light %ld temperature %ld humidity %ld location %ld\n", se, so, fe, wa, li, te, hu, lo);
     return lo;
 }
 
@@ -167,7 +168,6 @@ long part_1()
                 else if (l == -1)
                 {
                     l = buff;
-                    // printf("l = %ld\n", l);
                 }
                 buff = -1;
             }
@@ -369,6 +369,41 @@ long part_1()
         }
         else if (character == ':')
         {
+            char result[20];
+            switch (next_state)
+            {
+            case seed:
+                strcpy(result, "seed");
+                break;
+            case soil:
+                strcpy(result, "soil");
+                break;
+            case fert:
+                strcpy(result, "fert");
+                break;
+            case water:
+                strcpy(result, "water");
+                break;
+            case light:
+                strcpy(result, "light");
+                break;
+            case temp:
+                strcpy(result, "temp");
+                break;
+            case humid:
+                strcpy(result, "humid");
+                break;
+            case location:
+                strcpy(result, "location");
+                break;
+            case init:
+                strcpy(result, "init");
+                break;
+            default:
+                strcpy(result, "Invalid");
+                break;
+            }
+            printf("Going to state: %s\n", result);
             state = next_state;
             // "reset"
             buff = -1;
@@ -377,6 +412,7 @@ long part_1()
             l = -1;
         }
     }
+
     long min = __LONG_MAX__;
     long curr;
     for (size_t i = 0; i < seed_index; i++)
@@ -390,31 +426,47 @@ long part_1()
     return min;
 }
 
+long long part_2()
+{
+    long long curr, x, dx;
+    long long min = __LONG_LONG_MAX__;
+    for (int i = 0; i < seed_index - 1; i += 2)
+    {
+        x = seeds[i];
+        dx = seeds[i + 1];
+
+        for (long long j = x; j < x + dx; j++)
+        {
+            curr = recursive_src_dest(j);
+
+            if (curr < min)
+            {
+                min = curr;
+                printf("min: %lld\n", min);
+            }
+        }
+    }
+    return min;
+}
+
+long long part_2_electric_bogaloo()
+{
+    long long curr, x1, dx, x2;
+    long long min = __LONG_LONG_MAX__;
+    for (int i = 0; i < seed_index - 1; i += 2)
+    {
+        //TODO: make it not brute forces that hate Jonas would hate.
+    }
+    return min;
+}
+
 int main(void)
 {
     long ans1 = part_1();
-    printf("Lowest location = %ld", ans1);
+    printf("Lowest location = %ld\n", ans1);
 
-    /*long src, dest;
-    range_list_t seed_soil;
-    range_t seed_soilA, seed_soilB;
+    long long ans2 = part_2();
+    printf("Lowest location part 2 = %lld", ans2);
 
-    seed_soil.nbr_ranges = 0;
-
-    seed_soilA.dest_strt = 50;
-    seed_soilA.src_strt = 98;
-    seed_soilA.length = 2;
-
-    seed_soilB.dest_strt = 52;
-    seed_soilB.src_strt = 50;
-    seed_soilB.length = 48;
-
-    push_range(&seed_soil, seed_soilA);
-    push_range(&seed_soil, seed_soilB);
-
-    src = 10;
-    dest = src_dest_converter(seed_soil, src);
-    prlongf("in: %ld, out: %ld\n", src, dest);
-    */
     return 0;
 }
