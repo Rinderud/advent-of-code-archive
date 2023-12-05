@@ -449,16 +449,18 @@ long long part_2()
     return min;
 }
 
+/*
 long long part_2_electric_bogaloo()
 {
     long long curr, x1, dx, x2;
     long long min = __LONG_LONG_MAX__;
     for (int i = 0; i < seed_index - 1; i += 2)
     {
-        //TODO: make it not brute forces that hate Jonas would hate.
+        //TODO: make it not brute forces that Jonas would hate.
     }
     return min;
 }
+*/
 
 int main(void)
 {
