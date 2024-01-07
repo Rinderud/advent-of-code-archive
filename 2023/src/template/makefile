@@ -1,5 +1,5 @@
 CC	= cc
-CFLAGS	= -std=c11 -pedantic -Wall -Werror -g -O3 -funsigned-char -fsanitize=address
+CFLAGS	= -std=c11 -pedantic -Wall -Werror -g -O2 -funsigned-char -fsanitize=address
 OUT	= a.out
 FILE	= main
 
