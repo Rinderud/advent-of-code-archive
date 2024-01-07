@@ -62,20 +62,14 @@ long signed allzro(long signed *nums, size_t cols)
 
 long signed recur(long signed *nums, size_t cols)
 {
-    size_t i;
-    for (i = 0; i < cols; i++)
-    {
-        printf("%ld ", nums[i]);
-    }
-    printf("\n");
-
     if (cols <= 1 || allzro(nums, cols) == 0)
     {
         return 0;
     }
 
+    size_t i;
     long signed *newrow;
-    long signed a, b, diff;
+    long signed a, b, diff, newdiff, newnewdiff;
 
     newrow = calloc((cols - 1), sizeof(*newrow));
 
@@ -85,16 +79,11 @@ long signed recur(long signed *nums, size_t cols)
         b = a;
         a = nums[i];
         diff = a - b;
-        printf("%ld - %ld = %ld\n", a, b, diff);
-
         newrow[i - 1] = diff;
     }
 
-    long signed newdiff, newnewdiff;
     newdiff = recur(newrow, cols - 1);
     newnewdiff = newdiff + nums[cols - 1];
-
-    printf("%ld + %ld = %ld\n", nums[cols - 1], newdiff, newnewdiff);
 
     free(newrow);
     return newnewdiff;
@@ -105,11 +94,12 @@ int main(void)
     size_t cols, N, i;
     long signed sum, newdiff;
     long signed *nums;
+    size_char_t ret;
 
     N = 25;
     nums = calloc(N, sizeof(*nums));
 
-    size_char_t ret = {0, '?'};
+    ret = (size_char_t){0, '?'};
     sum = 0;
     i = 0;
     while (ret.c != '@')
