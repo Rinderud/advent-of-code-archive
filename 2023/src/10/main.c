@@ -14,9 +14,47 @@ struct pipe_t
 {
     point_t position;
     unsigned int distance;
-    pipe_t *connectedPipeA;
-    pipe_t *connectedPipeB;
+    pipe_t *backPipe;
+    pipe_t *nextPipe;
 };
+
+typedef struct
+{
+    pipe_t *A;
+    pipe_t *B;
+} connecting_pipes_t;
+
+void push(pipe_t *old, pipe_t *new)
+{
+    old->nextPipe = new;
+    new->backPipe = old;
+    printf("Adding (%d,%d) to (%d,%d)\n", new->position.x, new->position.y, old->position.x, old->position.y);
+}
+
+void destroy_LL(pipe_t *start)
+{
+    if (start == NULL)
+    {
+        printf("Start is null\n");
+        return;
+    }
+
+    if (start->nextPipe == NULL)
+    {
+        printf("Start has no nextPipe\n");
+        free(start);
+        return;
+    }
+
+    pipe_t *pipe;
+    pipe = start;
+    while (pipe->nextPipe != NULL)
+    {
+        pipe = pipe->nextPipe;
+        free(pipe->backPipe);
+    }
+    free(pipe);
+}
 
 size_t getline_rinderud(char *buffer, size_t bufsize)
 {
@@ -41,17 +79,6 @@ size_t getline_rinderud(char *buffer, size_t bufsize)
     return characters;
 }
 
-/*
-The pipes are arranged in a two-dimensional grid of tiles:
-    | is a vertical pipe connecting north and south.
-    - is a horizontal pipe connecting east and west.
-    L is a 90-degree bend connecting north and east.
-    J is a 90-degree bend connecting north and west.
-    7 is a 90-degree bend connecting south and west.
-    F is a 90-degree bend connecting south and east.
-    . is ground; there is no pipe in this tile.
-    S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
-*/
 pipe_t find_start(char **matrix, size_t rows, size_t columns)
 {
     point_t pos;
@@ -73,6 +100,118 @@ pipe_t find_start(char **matrix, size_t rows, size_t columns)
     }
     perror("Could not find start");
     exit(1);
+}
+
+connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t columns)
+{
+    printf("Checking around\n");
+    pipe_t *pipe_A, *pipe_B;
+    pipe_A = NULL;
+    pipe_B = NULL;
+
+    // Check around
+    int x, y;
+    point_t pos;
+    char ch;
+
+    // Left
+    if (start->position.x > 0)
+    {
+        x = start->position.x - 1;
+        y = start->position.y;
+        ch = matrix[y][x];
+
+        if (ch == 'F' || ch == '-' || ch == 'L') // The ones connecting to east
+        {
+            // Valid pipe, connect
+            pos = (point_t){.x = x, .y = y};
+            if (pipe_A)
+            {
+                pipe_B = malloc(sizeof(*pipe_B));
+                *pipe_B = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+            else
+            {
+                pipe_A = malloc(sizeof(*pipe_A));
+                *pipe_A = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+        }
+    }
+
+    // Right
+    if (start->position.x < columns)
+    {
+        x = start->position.x + 1;
+        y = start->position.y;
+        ch = matrix[y][x];
+
+        if (ch == 'J' || ch == '-' || ch == '7') // The ones connecting to west
+        {
+            // Valid pipe, connect
+            pos = (point_t){.x = x, .y = y};
+            if (pipe_A)
+            {
+                pipe_B = malloc(sizeof(*pipe_B));
+                *pipe_B = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+            else
+            {
+                pipe_A = malloc(sizeof(*pipe_A));
+                *pipe_A = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+        }
+    }
+
+    // Up
+    if (start->position.y > 0)
+    {
+        x = start->position.x;
+        y = start->position.y - 1;
+        ch = matrix[y][x];
+
+        if (ch == '|' || ch == 'L' || ch == 'J') // The ones connecting to north
+        {
+            // Valid pipe, connect
+            pos = (point_t){.x = x, .y = y};
+            if (pipe_A)
+            {
+                pipe_B = malloc(sizeof(*pipe_B));
+                *pipe_B = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+            else
+            {
+                pipe_A = malloc(sizeof(*pipe_A));
+                *pipe_A = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+        }
+    }
+
+    // Down
+    if (start->position.y < rows)
+    {
+        x = start->position.x;
+        y = start->position.y + 1;
+        ch = matrix[y][x];
+
+        if (ch == '|' || ch == '7' || ch == 'F') // The ones connecting to south
+        {
+            // Valid pipe, connect
+            pos = (point_t){.x = x, .y = y};
+            if (pipe_A)
+            {
+                pipe_B = malloc(sizeof(*pipe_B));
+                *pipe_B = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+            else
+            {
+                pipe_A = malloc(sizeof(*pipe_A));
+                *pipe_A = (pipe_t){.position = pos, .distance = 1, NULL, NULL};
+            }
+        }
+    }
+
+    printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
+    return (connecting_pipes_t){.A = pipe_A, .B = pipe_B};
 }
 
 int main(void)
@@ -112,54 +251,26 @@ int main(void)
     }
 
     // Find the starting location (S)
-    pipe_t start;
-    start = find_start(matrix, rows, columns);
-    printf("Start position: (%d,%d)\n", start.position.x, start.position.y);
+    pipe_t *start;
+    start = malloc(sizeof(*start));
+    *start = find_start(matrix, rows, columns);
+    printf("Start position: (%d,%d)\n", start->position.x, start->position.y);
 
     // TODO(Rinderud): Traverse the matrix and connect the pipes.
-    // Find connected pipes
+    /*
+    // Find connected pipes*/
     // Loop the circuit once and create the double linked list.
     // Loop again, the other way, and replace the distances that are now shorter.
     // When the new distance is larger (or equal) to the old distance.
     // The middle is found! (Which is the one furthest away)
-//    pipe_t current, previous;
-//    current = previous = start;
+    connecting_pipes_t pipes;
+    pipes = check(start, matrix, rows, columns);
+    push(start, pipes.A);
+    start->backPipe = pipes.B;
 
-    // Check around
-    size_t x,y;
-    // Left
-    if (start.position.x > 0)
-    {
-        x = start.position.x-1;
-        y = start.position.y;
-        printf("Left:%c\n", matrix[y][x]);
-    }
-
-    // Right
-    if (start.position.x < columns)
-    {
-        x = start.position.x+1;
-        y = start.position.y;
-        printf("Right:%c\n", matrix[y][x]);
-    }
-
-    // Up
-    if (start.position.y > 0)
-    {
-        x = start.position.x;
-        y = start.position.y-1;
-        printf("Up:%c\n", matrix[y][x]);
-    }
-
-    // Down
-    if (start.position.y < rows)
-    {
-        x = start.position.x;
-        y = start.position.y+1;
-        printf("Down:%c\n", matrix[y][x]);
-    }
-
+    free(start->backPipe);
     // Free
+    destroy_LL(start);
     for (size_t i = 0; i < rows; i++)
     {
         free(matrix[i]);
