@@ -29,6 +29,7 @@ void push(pipe_t *old, pipe_t *new)
     old->nextPipe = new;
     new->backPipe = old;
     printf("Adding (%d,%d) to (%d,%d)\n", new->position.x, new->position.y, old->position.x, old->position.y);
+    new->distance = old->distance+1;
 }
 
 void destroy_LL(pipe_t *start)
@@ -121,7 +122,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
         y = start->position.y;
         ch = matrix[y][x];
 
-        if (ch == 'F' || ch == '-' || ch == 'L') // The ones connecting to east
+        if (ch == 'F' || ch == '-' || ch == 'L' || ch == 'S') // The ones connecting to east
         {
             // Valid pipe, connect
             pos = (point_t){.x = x, .y = y};
@@ -145,7 +146,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
         y = start->position.y;
         ch = matrix[y][x];
 
-        if (ch == 'J' || ch == '-' || ch == '7') // The ones connecting to west
+        if (ch == 'J' || ch == '-' || ch == '7' || ch == 'S') // The ones connecting to west
         {
             // Valid pipe, connect
             pos = (point_t){.x = x, .y = y};
@@ -169,7 +170,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
         y = start->position.y - 1;
         ch = matrix[y][x];
 
-        if (ch == '|' || ch == 'L' || ch == 'J') // The ones connecting to north
+        if (ch == '|' || ch == '7' || ch == 'F' || ch == 'S') // The ones connecting to south
         {
             // Valid pipe, connect
             pos = (point_t){.x = x, .y = y};
@@ -193,7 +194,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
         y = start->position.y + 1;
         ch = matrix[y][x];
 
-        if (ch == '|' || ch == '7' || ch == 'F') // The ones connecting to south
+        if (ch == '|' || ch == 'L' || ch == 'J' || ch == 'S') // The ones connecting to north
         {
             // Valid pipe, connect
             pos = (point_t){.x = x, .y = y};
@@ -209,9 +210,20 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
             }
         }
     }
-
-    printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
+    if (pipe_A == NULL || pipe_B == NULL)
+    {
+        printf("Pipe is null!");
+    }
+    else
+    {
+        printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
+    }
     return (connecting_pipes_t){.A = pipe_A, .B = pipe_B};
+}
+
+int isDifferent(pipe_t *A, pipe_t *B)
+{
+    return (A->position.x - B->position.x) * 256 + (A->position.y - B->position.y);
 }
 
 int main(void)
@@ -267,6 +279,35 @@ int main(void)
     pipes = check(start, matrix, rows, columns);
     push(start, pipes.A);
     start->backPipe = pipes.B;
+
+    pipe_t *pipe = start->nextPipe;
+    while (isDifferent(pipe, start->backPipe))
+    {
+        pipes = check(pipe, matrix, rows, columns);
+        if (pipes.A == NULL || pipes.B == NULL)
+        {
+            goto frees;
+        }
+
+        if (isDifferent(pipe->backPipe, pipes.A) && isDifferent(pipes.A, start))
+        {
+            push(pipe, pipes.A);
+            free(pipes.B);
+        }
+        else if (isDifferent(pipes.B, start))
+        {
+            push(pipe, pipes.B);
+            free(pipes.A);
+        }
+        else
+        {
+            printf("Faulty logic\n");
+        }
+        pipe = pipe->nextPipe;
+    }
+    printf("%d -> %d -> %d\n", start->distance, start->nextPipe->distance, start->nextPipe->nextPipe->distance);
+
+frees:
 
     free(start->backPipe);
     // Free
