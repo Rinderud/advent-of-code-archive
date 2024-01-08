@@ -59,7 +59,7 @@ pipe_t find_start(char **matrix, size_t rows, size_t columns)
     {
         for (size_t j = 0; j < columns; j++)
         {
-            pos = (point_t){.x = i, .y = j};
+            pos = (point_t){.x = j, .y = i};
             ch = matrix[i][j];
             // printf("pos: (%d,%d) = %c\n", pos.x, pos.y, ch);
 
