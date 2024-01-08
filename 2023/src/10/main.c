@@ -13,6 +13,7 @@ typedef struct point_t
 struct pipe_t
 {
     point_t position;
+    unsigned int distance;
     pipe_t *connectedPipeA;
     pipe_t *connectedPipeB;
 };
@@ -65,7 +66,7 @@ pipe_t find_start(char **matrix, size_t rows, size_t columns)
 
             if (ch == 'S')
             {
-                pipe_t start = (pipe_t){.position = pos, NULL, NULL};
+                pipe_t start = (pipe_t){.position = pos, 0, NULL, NULL};
                 return start;
             }
         }
@@ -116,6 +117,47 @@ int main(void)
     printf("Start position: (%d,%d)\n", start.position.x, start.position.y);
 
     // TODO(Rinderud): Traverse the matrix and connect the pipes.
+    // Find connected pipes
+    // Loop the circuit once and create the double linked list.
+    // Loop again, the other way, and replace the distances that are now shorter.
+    // When the new distance is larger (or equal) to the old distance.
+    // The middle is found! (Which is the one furthest away)
+//    pipe_t current, previous;
+//    current = previous = start;
+
+    // Check around
+    size_t x,y;
+    // Left
+    if (start.position.x > 0)
+    {
+        x = start.position.x-1;
+        y = start.position.y;
+        printf("Left:%c\n", matrix[y][x]);
+    }
+
+    // Right
+    if (start.position.x < columns)
+    {
+        x = start.position.x+1;
+        y = start.position.y;
+        printf("Right:%c\n", matrix[y][x]);
+    }
+
+    // Up
+    if (start.position.y > 0)
+    {
+        x = start.position.x;
+        y = start.position.y-1;
+        printf("Up:%c\n", matrix[y][x]);
+    }
+
+    // Down
+    if (start.position.y < rows)
+    {
+        x = start.position.x;
+        y = start.position.y+1;
+        printf("Down:%c\n", matrix[y][x]);
+    }
 
     // Free
     for (size_t i = 0; i < rows; i++)
