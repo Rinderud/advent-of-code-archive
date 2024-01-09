@@ -106,12 +106,56 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     pipe_B = NULL;
 
     // Check around
-    int x, y;
+    int x, y, lft, rht, up, dwn;
     point_t pos;
     char ch;
 
+    lft = 0;
+    rht = 0;
+    up = 0;
+    dwn = 0;
+    x = start->position.x;
+    y = start->position.y;
+    ch = matrix[y][x];
+    switch (ch)
+    {
+    case 'S':
+        lft = 1;
+        rht = 1;
+        up = 1;
+        dwn = 1;
+        break;
+    case '-':
+        lft = 1;
+        rht = 1;
+        break;
+    case '|':
+        up = 1;
+        dwn = 1;
+        break;
+    case 'L':
+        up = 1;
+        rht = 1;
+        break;
+    case 'J':
+        up = 1;
+        lft = 1;
+        break;
+    case '7':
+        lft = 1;
+        dwn = 1;
+        break;
+    case 'F':
+        dwn = 1;
+        rht = 1;
+        break;
+    default:
+        printf("Logical failure\n");
+        break;
+    }
+
     // Left
-    if (start->position.x > 0)
+    if (start->position.x > 0 && lft)
     {
         x = start->position.x - 1;
         y = start->position.y;
@@ -135,7 +179,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
 
     // Right
-    if (start->position.x < columns - 1)
+    if (start->position.x < columns - 1 && rht)
     {
         x = start->position.x + 1;
         y = start->position.y;
@@ -159,7 +203,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
 
     // Up
-    if (start->position.y > 0)
+    if (start->position.y > 0 && up)
     {
         x = start->position.x;
         y = start->position.y - 1;
@@ -183,7 +227,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
 
     // Down
-    if (start->position.y < rows - 1)
+    if (start->position.y < rows - 1 && dwn)
     {
         x = start->position.x;
         y = start->position.y + 1;
@@ -205,6 +249,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
             }
         }
     }
+
     if (pipe_A == NULL || pipe_B == NULL)
     {
         printf("Pipe is null!");
@@ -213,6 +258,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     {
         // printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
     }
+
     return (connecting_pipes_t){.A = pipe_A, .B = pipe_B};
 }
 
