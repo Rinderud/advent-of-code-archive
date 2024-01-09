@@ -28,21 +28,18 @@ void push(pipe_t *old, pipe_t *new)
 {
     old->nextPipe = new;
     new->backPipe = old;
-    printf("Adding (%d,%d) to (%d,%d)\n", new->position.x, new->position.y, old->position.x, old->position.y);
-    new->distance = old->distance+1;
+    new->distance = old->distance + 1;
 }
 
 void destroy_LL(pipe_t *start)
 {
     if (start == NULL)
     {
-        printf("Start is null\n");
         return;
     }
 
     if (start->nextPipe == NULL)
     {
-        printf("Start has no nextPipe\n");
         free(start);
         return;
     }
@@ -90,7 +87,6 @@ pipe_t find_start(char **matrix, size_t rows, size_t columns)
         {
             pos = (point_t){.x = j, .y = i};
             ch = matrix[i][j];
-            // printf("pos: (%d,%d) = %c\n", pos.x, pos.y, ch);
 
             if (ch == 'S')
             {
@@ -105,7 +101,6 @@ pipe_t find_start(char **matrix, size_t rows, size_t columns)
 
 connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t columns)
 {
-    printf("Checking around\n");
     pipe_t *pipe_A, *pipe_B;
     pipe_A = NULL;
     pipe_B = NULL;
@@ -140,7 +135,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
 
     // Right
-    if (start->position.x < columns)
+    if (start->position.x < columns - 1)
     {
         x = start->position.x + 1;
         y = start->position.y;
@@ -188,7 +183,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
 
     // Down
-    if (start->position.y < rows)
+    if (start->position.y < rows - 1)
     {
         x = start->position.x;
         y = start->position.y + 1;
@@ -216,7 +211,7 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
     }
     else
     {
-        printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
+        // printf("A: (%d,%d), B: (%d,%d)\n", pipe_A->position.x, pipe_A->position.y, pipe_B->position.x, pipe_B->position.y);
     }
     return (connecting_pipes_t){.A = pipe_A, .B = pipe_B};
 }
@@ -224,6 +219,28 @@ connecting_pipes_t check(pipe_t *start, char **matrix, size_t rows, size_t colum
 int isDifferent(pipe_t *A, pipe_t *B)
 {
     return (A->position.x - B->position.x) * 256 + (A->position.y - B->position.y);
+}
+
+int loop_back(pipe_t *start, char **matrix, size_t rows, size_t columns)
+{
+    pipe_t *pipe;
+    start->distance = 1;
+    pipe = start->backPipe;
+    while (isDifferent(pipe->backPipe, start) && pipe->distance > pipe->nextPipe->distance)
+    {
+        if (pipe->distance > pipe->nextPipe->distance + 1)
+        {
+            pipe->distance = pipe->nextPipe->distance + 1;
+        }
+        else
+        {
+            return pipe->distance;
+        }
+
+        pipe = pipe->backPipe;
+    }
+
+    return start->distance;
 }
 
 int main(void)
@@ -236,7 +253,6 @@ int main(void)
     buffer = malloc(buf_size * sizeof(*buffer)); //! Doesn't check if null
 
     // Prepp
-    printf("Reading the matrix\n");
     columns = getline_rinderud(buffer, buf_size);
     rows = columns; //? Assuming the matrix is a square and not rectangle.
     printf("%zu x %zu\n", rows, columns);
@@ -256,11 +272,13 @@ int main(void)
         strcpy(matrix[i], buffer);
     }
 
-    // Print the matrix for validation
-    for (size_t i = 0; i < rows; i++)
-    {
-        printf("%s\n", matrix[i]);
-    }
+    /*
+        // Print the matrix for validation
+        for (size_t i = 0; i < rows; i++)
+        {
+            printf("%s\n", matrix[i]);
+        }
+    */
 
     // Find the starting location (S)
     pipe_t *start;
@@ -268,13 +286,6 @@ int main(void)
     *start = find_start(matrix, rows, columns);
     printf("Start position: (%d,%d)\n", start->position.x, start->position.y);
 
-    // TODO(Rinderud): Traverse the matrix and connect the pipes.
-    /*
-    // Find connected pipes*/
-    // Loop the circuit once and create the double linked list.
-    // Loop again, the other way, and replace the distances that are now shorter.
-    // When the new distance is larger (or equal) to the old distance.
-    // The middle is found! (Which is the one furthest away)
     connecting_pipes_t pipes;
     pipes = check(start, matrix, rows, columns);
     push(start, pipes.A);
@@ -302,15 +313,17 @@ int main(void)
         else
         {
             printf("Faulty logic\n");
+            goto frees;
         }
         pipe = pipe->nextPipe;
     }
-    printf("%d -> %d -> %d\n", start->distance, start->nextPipe->distance, start->nextPipe->nextPipe->distance);
+    printf("length of full pipe: %d\n", pipe->distance + 1);
+    int max_dist = loop_back(pipe, matrix, rows, columns);
+    printf("farthest = %d", max_dist);
 
 frees:
-
-    free(start->backPipe);
     // Free
+    free(start->backPipe);
     destroy_LL(start);
     for (size_t i = 0; i < rows; i++)
     {
