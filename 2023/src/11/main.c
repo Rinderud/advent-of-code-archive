@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
-#define DEBUG
-#define SIZEOFTHEUNIVERSE 10 // 450
+// #define DEBUG
+#define SIZEOFTHEUNIVERSE /*10*/ 450
 
 void debug(char ch[])
 {
@@ -72,10 +72,7 @@ int cmp_x(const void *a, const void *b)
 void expand_map(point_t *map, int n)
 {
     debug("expand_map\n");
-    int xbound, ybound, i, j, previous, current;
-
-    ybound = map[n - 1].y;
-    printf("ybound: {0, %d}\n", ybound);
+    int i, j, previous, current;
 
     previous = map[n - 1].y;
     for (i = n - 2; i >= 0; i--)
@@ -93,8 +90,6 @@ void expand_map(point_t *map, int n)
 
     qsort(map, n, sizeof(*map), cmp_x);
 
-    xbound = map[n - 1].x;
-    printf("xbound: {0, %d}\n", xbound);
     previous = map[n - 1].x;
     for (i = n - 2; i >= 0; i--)
     {
@@ -117,9 +112,23 @@ int manhattan_dist(point_t a, point_t b)
     return sum;
 }
 
+int sum_distances(point_t *map, int n)
+{
+    int sum = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = i + 1; j < n; j++)
+        {
+            sum += manhattan_dist(map[i], map[j]);
+        }
+    }
+    return sum;
+}
+
 int main(void)
 {
     int nbrgal;
+    int sum;
     point_t *map;
 
     struct arrsiz retarr = read_in_map();
@@ -129,6 +138,9 @@ int main(void)
     printf("Found %d galaxies on the map\n", nbrgal);
 
     expand_map(map, nbrgal);
+
+    sum = sum_distances(map, nbrgal);
+    printf("Total = %d\n", sum);
 
     // Frees
     free(map);
