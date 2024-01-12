@@ -10,7 +10,7 @@ void debug(char ch[])
 #endif
 }
 
-typedef struct
+typedef struct point_t
 {
     int x;
     int y;
@@ -30,10 +30,6 @@ void pripoi(point_t p)
 struct arrsiz read_in_map(void)
 {
     debug("read_in_map\n");
-    /*
-    1. allocate array of points
-    2. read input and create points
-    */
     int i, x, y, ch;
     point_t *map;
 
@@ -65,15 +61,59 @@ struct arrsiz read_in_map(void)
     return (struct arrsiz){.arr = map, .size = i};
 }
 
-void expand_map(void)
+int cmp_x(const void *a, const void *b)
+{
+    const point_t *p1 = a;
+    const point_t *p2 = b;
+
+    return (p1->x > p2->x);
+}
+
+void expand_map(point_t *map, int n)
 {
     debug("expand_map\n");
     /*
-    1. find edges (largest x and y)
+    // 1. find edges (largest x and y)
     2. add one to the points affected walking from the bottom
-    3. sort by x
+    // 3. sort by x
     4. add one to the points affected walking from the right
     */
+    int xbound, ybound, i, j, previous, current;
+
+    ybound = map[n - 1].y;
+    printf("ybound: {0, %d}\n", ybound);
+
+    previous = map[n - 1].y;
+    for (i = n - 2; i >= 0; i--)
+    {
+        current = map[i].y;
+        if (previous - current > 1)
+        {
+            for (j = i + 1; j < n; j++)
+            {
+                map[j].y++;
+            }
+        }
+        previous = current;
+    }
+
+    qsort(map, n, sizeof(*map), cmp_x);
+
+    xbound = map[n - 1].x;
+    printf("xbound: {0, %d}\n", xbound);
+    previous = map[n - 1].x;
+    for (i = n - 2; i >= 0; i--)
+    {
+        current = map[i].x;
+        if (previous - current > 1)
+        {
+            for (j = i + 1; j < n; j++)
+            {
+                map[j].x++;
+            }
+        }
+        previous = current;
+    }
 }
 
 int manhattan_dist(point_t a, point_t b)
@@ -93,11 +133,18 @@ int main(void)
     nbrgal = retarr.size;
 
     printf("Found %d galaxies on the map\n", nbrgal);
-    pripoi(map[0]);
-    pripoi(map[1]);
-    pripoi(map[2]);
-    pripoi(map[nbrgal - 1]);
+    for (size_t i = 0; i < nbrgal; i++)
+    {
+        pripoi(map[i]);
+    }
 
+    expand_map(map, nbrgal);
+    for (size_t i = 0; i < nbrgal; i++)
+    {
+        pripoi(map[i]);
+    }
+
+    // Frees
     free(map);
     return 0;
 }
