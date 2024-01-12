@@ -72,12 +72,6 @@ int cmp_x(const void *a, const void *b)
 void expand_map(point_t *map, int n)
 {
     debug("expand_map\n");
-    /*
-    // 1. find edges (largest x and y)
-    2. add one to the points affected walking from the bottom
-    // 3. sort by x
-    4. add one to the points affected walking from the right
-    */
     int xbound, ybound, i, j, previous, current;
 
     ybound = map[n - 1].y;
@@ -91,7 +85,7 @@ void expand_map(point_t *map, int n)
         {
             for (j = i + 1; j < n; j++)
             {
-                map[j].y++;
+                map[j].y += previous - current - 1;
             }
         }
         previous = current;
@@ -109,7 +103,7 @@ void expand_map(point_t *map, int n)
         {
             for (j = i + 1; j < n; j++)
             {
-                map[j].x++;
+                map[j].x += previous - current - 1;
             }
         }
         previous = current;
@@ -133,16 +127,8 @@ int main(void)
     nbrgal = retarr.size;
 
     printf("Found %d galaxies on the map\n", nbrgal);
-    for (size_t i = 0; i < nbrgal; i++)
-    {
-        pripoi(map[i]);
-    }
 
     expand_map(map, nbrgal);
-    for (size_t i = 0; i < nbrgal; i++)
-    {
-        pripoi(map[i]);
-    }
 
     // Frees
     free(map);
