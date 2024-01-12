@@ -2,6 +2,7 @@
 #include <stdio.h>
 // #define DEBUG
 #define SIZEOFTHEUNIVERSE /*10*/ 450
+#define EXPANSIONCONSTANT 1000000 - 1
 
 void debug(char ch[])
 {
@@ -12,8 +13,8 @@ void debug(char ch[])
 
 typedef struct point_t
 {
-    int x;
-    int y;
+    long long x;
+    long long y;
 } point_t;
 
 struct arrsiz
@@ -24,13 +25,14 @@ struct arrsiz
 
 void pripoi(point_t p)
 {
-    printf("(%d,%d)\n", p.x, p.y);
+    printf("(%lld,%lld)\n", p.x, p.y);
 }
 
 struct arrsiz read_in_map(void)
 {
     debug("read_in_map\n");
-    int i, x, y, ch;
+    int i, ch;
+    long long x, y;
     point_t *map;
 
     map = calloc(SIZEOFTHEUNIVERSE, sizeof(*map));
@@ -72,7 +74,8 @@ int cmp_x(const void *a, const void *b)
 void expand_map(point_t *map, int n)
 {
     debug("expand_map\n");
-    int i, j, previous, current;
+    int i, j;
+    long previous, current;
 
     previous = map[n - 1].y;
     for (i = n - 2; i >= 0; i--)
@@ -82,7 +85,7 @@ void expand_map(point_t *map, int n)
         {
             for (j = i + 1; j < n; j++)
             {
-                map[j].y += previous - current - 1;
+                map[j].y += EXPANSIONCONSTANT * (previous - current - 1);
             }
         }
         previous = current;
@@ -98,23 +101,23 @@ void expand_map(point_t *map, int n)
         {
             for (j = i + 1; j < n; j++)
             {
-                map[j].x += previous - current - 1;
+                map[j].x += EXPANSIONCONSTANT * (previous - current - 1);
             }
         }
         previous = current;
     }
 }
 
-int manhattan_dist(point_t a, point_t b)
+unsigned long long manhattan_dist(point_t a, point_t b)
 {
-    int sum;
+    unsigned long long sum;
     sum = abs(a.x - b.x) + abs(a.y - b.y);
     return sum;
 }
 
-int sum_distances(point_t *map, int n)
+unsigned long long sum_distances(point_t *map, int n)
 {
-    int sum = 0;
+    unsigned long long sum = 0;
     for (size_t i = 0; i < n; i++)
     {
         for (size_t j = i + 1; j < n; j++)
@@ -128,7 +131,7 @@ int sum_distances(point_t *map, int n)
 int main(void)
 {
     int nbrgal;
-    int sum;
+    unsigned long long sum;
     point_t *map;
 
     struct arrsiz retarr = read_in_map();
@@ -140,7 +143,7 @@ int main(void)
     expand_map(map, nbrgal);
 
     sum = sum_distances(map, nbrgal);
-    printf("Total = %d\n", sum);
+    printf("Total = %lld\n", sum);
 
     // Frees
     free(map);
