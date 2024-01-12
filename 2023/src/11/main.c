@@ -2,7 +2,7 @@
 #include <stdio.h>
 // #define DEBUG
 #define SIZEOFTHEUNIVERSE /*10*/ 450
-#define EXPANSIONCONSTANT 1000000 - 1
+#define EXPANSIONCONSTANT (1000000 - 1)
 
 void debug(char ch[])
 {
