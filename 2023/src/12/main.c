@@ -113,6 +113,7 @@ arr_siz_t read_replications(void)
         {
             replications[i] = number;
             i++;
+            number = 0;
         }
         ch = getchar();
     }
