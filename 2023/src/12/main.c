@@ -13,6 +13,7 @@ typedef struct condition_record_t
 {
     condition_t *conditions;
     unsigned int *replication;
+    size_t N[2];
 } condition_record_t;
 
 typedef struct arr_siz_t
@@ -98,8 +99,6 @@ arr_siz_t read_replications(void)
     number = 0;
     while (ch != '\n' && ch != EOF)
     {
-        printf("[%c]\n", ch);
-
         if (i >= N)
         {
             N *= 2; // Double the available space
@@ -140,16 +139,16 @@ condition_record_t *read_record(void)
     ret = read_conditions();
     N1 = ret.N;
     conditions = ret.arr;
-    printf("Read %zu conditions\n", N1);
 
     ret = read_replications();
     N2 = ret.N;
     replications = ret.arr;
-    printf("Read %zu replications\n", N2);
 
     record = malloc(sizeof(*record));
     record->conditions = conditions;
     record->replication = replications;
+    record->N[0] = N1;
+    record->N[1] = N2;
 
     return record;
 }
@@ -157,9 +156,12 @@ int main(void)
 {
     condition_record_t *record;
 
-    record = read_record();
+    for (size_t i = 0; i < 5; i++)
+    {
+        record = read_record();
 
-    destroy_condition_record(record);
+        destroy_condition_record(record);
+    }
 
     return 0;
 }
