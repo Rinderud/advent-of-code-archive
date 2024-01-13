@@ -9,18 +9,37 @@ typedef enum condition_t
     UNKNOWN,
 } condition_t;
 
-typedef struct condition_record_t
+void show_condition(condition_t cond)
 {
-    condition_t *conditions;
-    unsigned int *replication;
-    size_t N[2];
-} condition_record_t;
+    switch (cond)
+    {
+    case GOOD:
+        printf(".");
+        break;
+    case BAD:
+        printf("#");
+        break;
+    case UNKNOWN:
+        printf("?");
+        break;
+    default:
+        printf("Invalid");
+        break;
+    }
+}
 
 typedef struct arr_siz_t
 {
     void *arr;
     size_t N;
 } arr_siz_t;
+
+typedef struct condition_record_t
+{
+    condition_t *conditions;
+    unsigned int *replication;
+    size_t N[2];
+} condition_record_t;
 
 void destroy_condition_record(condition_record_t *condition_record)
 {
@@ -44,7 +63,8 @@ arr_siz_t read_conditions(void)
     conditions = malloc(N * sizeof(*conditions));
 
     i = 0;
-    while ((ch = getchar()) != ' ')
+    ch = getchar();
+    while (ch != ' ' && ch != EOF)
     {
         if (i >= N)
         {
@@ -72,6 +92,7 @@ arr_siz_t read_conditions(void)
 
         conditions[i] = cond;
         i++;
+        ch = getchar();
     }
 
     N = i;
@@ -97,7 +118,7 @@ arr_siz_t read_replications(void)
     i = 0;
     ch = getchar();
     number = 0;
-    while (ch != '\n' && ch != EOF)
+    while ((ch >= '0' && ch <= '9') || ch == ',')
     {
         if (i >= N)
         {
@@ -153,15 +174,51 @@ condition_record_t *read_record(void)
 
     return record;
 }
+
+unsigned int valid_permutaions(condition_record_t *record)
+{
+    unsigned int sum = 0;
+    size_t N1, N2, i;
+    condition_t *conds;
+    unsigned int *repl;
+
+    N1 = record->N[0];
+    N2 = record->N[1];
+    conds = record->conditions;
+    repl = record->replication;
+
+    for (i = 0; i < N1; i++)
+    {
+        show_condition(conds[i]);
+    }
+    printf(" ");
+
+    for (i = 0; i < N2 - 1; i++)
+    {
+        printf("%d,", repl[i]);
+    }
+    printf("%d\n", repl[i]);
+
+    return sum;
+}
+
 int main(void)
 {
+    unsigned int sum = 0;
     condition_record_t *record;
 
-    for (size_t i = 0; i < 5; i++)
+    for (size_t i = 0; i < 6; i++)
     {
         record = read_record();
 
+        sum += valid_permutaions(record);
+
         destroy_condition_record(record);
+    }
+
+    if (sum != 0)
+    {
+        printf("Total = %d", sum);
     }
 
     return 0;
