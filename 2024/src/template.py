@@ -1,29 +1,36 @@
 import structlog
 
 
+def interpretInput(input: list[str], log: structlog.BoundLogger):
+    return input
+
+
+def part1(interpretation, log: structlog.BoundLogger) -> int:
+    return 0
+
+
+def part2(interpretation, log: structlog.BoundLogger) -> int:
+    return 0
+
+
 if __name__ == "__main__":
-    DAY = "01"
-    DEBUG = True
-    PART = 1
+    DAY = "XX"
+    DEBUG = False
 
-    log = structlog.get_logger(DAY=DAY, PART=PART)
+    log: structlog.BoundLogger = structlog.get_logger(DAY=DAY, DEBUG=DEBUG)
 
-    log.info(f"Day {DAY}, part {PART}!")
+    log.info(f"Day {DAY}!")
 
     input: list[str]
     with open(
-        f"./data/input" + f"_{DAY}{'_DEBUG' if DEBUG else ''}" + f"_{PART}" + ".txt",
+        f"./data/input" + f"_{DAY}{'_DEBUG' if DEBUG else ''}" + ".txt",
         mode="r",
     ) as f:
         input = f.read().split("\n")
 
-    for i, line in enumerate(input):
-        log.debug(f"{i}: {line}")
+    interpretation = interpretInput(input, log)
+    outputPart1 = part1(interpretation, log)
+    outputPart2 = part2(interpretation, log)
 
-    log.info("Writing to output file")
-    with open(
-        f"./data/output" + f"_{DAY}{'_DEBUG' if DEBUG else ''}" + f"_{PART}" + ".txt",
-        mode="w",
-    ) as f:
-        for row in input:
-            f.write(row + "\n")
+    log.info(f"Part 1: {outputPart1}")
+    log.info(f"Part 2: {outputPart2}")
