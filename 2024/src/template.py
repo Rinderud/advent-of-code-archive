@@ -1,3 +1,4 @@
+import logging
 import structlog
 
 
@@ -15,9 +16,15 @@ def part2(interpretation, log: structlog.BoundLogger) -> int:
 
 if __name__ == "__main__":
     DAY = "XX"
-    DEBUG = False
+    DEBUG = True
 
-    log: structlog.BoundLogger = structlog.get_logger(DAY=DAY, DEBUG=DEBUG)
+    structlog.configure(
+        wrapper_class=structlog.make_filtering_bound_logger(
+            logging.DEBUG if DEBUG else logging.INFO
+        ),
+    )
+
+    log: structlog.BoundLogger = structlog.get_logger(DAY=DAY)
 
     log.info(f"Day {DAY}!")
 
