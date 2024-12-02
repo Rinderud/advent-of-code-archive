@@ -23,7 +23,7 @@ def validate(diffs: list[int]) -> bool:
         else:
             return False
 
-    return True 
+    return True
 
 
 def part1(interpretation, log: structlog.BoundLogger) -> int:
