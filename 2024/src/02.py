@@ -12,7 +12,6 @@ def interpretInput(input: list[str], log: structlog.BoundLogger):
 
 
 def validate(diffs: list[int]) -> bool:
-    valid: bool = True
     asc: bool = diffs[0] >= 0
 
     for diff in diffs:
@@ -24,7 +23,7 @@ def validate(diffs: list[int]) -> bool:
         else:
             return False
 
-    return valid
+    return True 
 
 
 def part1(interpretation, log: structlog.BoundLogger) -> int:
