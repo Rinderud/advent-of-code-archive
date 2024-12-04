@@ -38,6 +38,8 @@ def part2(input, instructions, log: structlog.BoundLogger) -> int:
         parts: list[str] = temp.split(f"mul({a},{b})")
         log.debug(f"{parts=} {temp=}")
 
+        # ?: What happens when the left part is "don't_xyz_do" ?
+        # TODO: This should take the last match.
         if re.search("don't", parts[0]):
             on = False
             log.debug("Turning off")
