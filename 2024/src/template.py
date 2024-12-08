@@ -2,15 +2,15 @@ import logging
 import structlog
 
 
-def interpretInput(input: list[str], log: structlog.BoundLogger):
-    return input
+def interpretInput(input: str, log: structlog.PrintLogger):
+    return input.splitlines()
 
 
-def part1(interpretation, log: structlog.BoundLogger) -> int:
+def part1(interpretation, log: structlog.PrintLogger) -> int:
     return 0
 
 
-def part2(interpretation, log: structlog.BoundLogger) -> int:
+def part2(interpretation, log: structlog.PrintLogger) -> int:
     return 0
 
 
@@ -24,16 +24,16 @@ if __name__ == "__main__":
         ),
     )
 
-    log: structlog.BoundLogger = structlog.get_logger(DAY=DAY)
+    log: structlog.PrintLogger = structlog.get_logger(DAY=DAY)
 
     log.info(f"Day {DAY}!")
 
-    input: list[str]
+    input: str
     with open(
         f"./data/input" + f"_{DAY}{'_DEBUG' if DEBUG else ''}" + ".txt",
         mode="r",
     ) as f:
-        input = f.read().split("\n")
+        input = f.read()
 
     interpretation = interpretInput(input, log)
     outputPart1 = part1(interpretation, log)
